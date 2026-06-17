@@ -1,0 +1,137 @@
+{
+  "model_details": {
+    "name": "FinSight360 Anomaly Detection Model",
+    "version": "1.0.0",
+    "type": "Unsupervised Anomaly Detection (Isolation Forest)",
+    "owner": "FinSight360 Risk Analytics Team",
+    "created_date": "2024-01-01",
+    "last_updated": "2026-05-21",
+    "contact": "risk-analytics@finsight360.com",
+    "license": "Proprietary \u2014 Internal Use Only",
+    "framework": "scikit-learn IsolationForest + RobustScaler",
+    "description": "Ensemble anomaly detection model trained on SEC EDGAR 10-K financial metrics. Combines Isolation Forest ML scores (50%), Benford's Law forensic scores (30%), and corporate network risk (20%) into a final risk score. SHAP TreeExplainer provides per-company feature attribution."
+  },
+  "intended_use": {
+    "primary_use": "Financial forensic analysis \u2014 identifying companies with anomalous financial reporting patterns",
+    "intended_users": [
+      "Internal risk analysts",
+      "Compliance officers",
+      "Audit teams",
+      "Quantitative researchers"
+    ],
+    "out_of_scope": [
+      "Automated trading decisions without human review",
+      "Legal determination of fraud",
+      "Real-time transaction monitoring",
+      "Retail investor advice"
+    ],
+    "human_oversight": "All HIGH and CRITICAL risk flags require human analyst review before any action"
+  },
+  "model_architecture": {
+    "algorithm": "IsolationForest (sklearn)",
+    "contamination": 0.1,
+    "n_estimators": 100,
+    "preprocessing": "RobustScaler (median/IQR normalization, outlier-robust)",
+    "feature_count": 17,
+    "features": [
+      "gross_margin",
+      "operating_margin",
+      "net_margin",
+      "revenue_yoy_growth",
+      "ar_to_revenue",
+      "current_ratio",
+      "debt_to_equity",
+      "roe",
+      "flag_ar_acceleration",
+      "flag_cashflow_divergence",
+      "flag_margin_compression",
+      "flag_aggressive_recognition",
+      "flag_high_leverage",
+      "flag_liquidity_stress",
+      "total_signal_count",
+      "late_filings_count",
+      "max_reporting_lag_days"
+    ],
+    "ensemble_weights": {
+      "isolation_forest_ml": 0.5,
+      "benfords_law": 0.3,
+      "network_graph_risk": 0.2
+    },
+    "explainability": "SHAP TreeExplainer (exact Shapley values, O(TLD) complexity)",
+    "storage": "DuckDB (local) / Azure Data Explorer (cloud)"
+  },
+  "training_data": {
+    "source": "SEC EDGAR XBRL financial data via public REST API",
+    "period": "2019\u20132024 (5-year rolling window)",
+    "company_count": 0,
+    "filing_types": [
+      "10-K annual reports"
+    ],
+    "preprocessing": [
+      "XBRL fact extraction and normalization",
+      "Benford digit distribution computation",
+      "Corporate graph construction (NetworkX)",
+      "RobustScaler feature normalization"
+    ],
+    "known_limitations": [
+      "Training data limited to US public companies filing with SEC",
+      "XBRL quality varies by company and filing year",
+      "Financial restatements may affect historical accuracy",
+      "Model does not use unstructured text (MD&A, footnotes)"
+    ]
+  },
+  "performance": {
+    "note": "Unsupervised model \u2014 no labeled ground truth; metrics are diagnostic",
+    "anomaly_rate": "N/A",
+    "total_companies_scored": 0,
+    "total_scoring_events": NaN,
+    "high_risk_flags": NaN,
+    "human_reviews_completed": NaN,
+    "explainability_coverage": "100% (SHAP values computed for all scored companies)",
+    "audit_trail_coverage": "100% (every scoring event logged)",
+    "risk_tier_thresholds": {
+      "CRITICAL": ">= 85",
+      "HIGH": ">= 70",
+      "MEDIUM": ">= 50",
+      "LOW": ">= 30",
+      "MINIMAL": "< 30"
+    }
+  },
+  "ethical_considerations": {
+    "bias_monitoring": {
+      "method": "Z-score analysis across industry groups and geographic regions",
+      "threshold": "Groups > 1.5 standard deviations from overall mean are flagged",
+      "frequency": "Run after every batch scoring event",
+      "compliance": "EU AI Act Article 10 \u2014 data governance and bias monitoring"
+    },
+    "fairness_principles": [
+      "Industry-neutral scoring \u2014 no sector receives categorical treatment",
+      "Scores reflect financial metrics only, not company identity",
+      "All anomaly flags are advisory \u2014 human review required for action",
+      "SHAP explanations provided for every score to prevent black-box decisions"
+    ],
+    "privacy": "No personally identifiable information (PII) processed \u2014 only public SEC filings",
+    "transparency": "Full model card, SHAP explanations, and audit trail publicly documented"
+  },
+  "caveats": [
+    "This model flags statistical anomalies, not confirmed fraud \u2014 many flags are false positives",
+    "Past anomaly patterns do not guarantee future fraud detection",
+    "Financial restatements or XBRL errors in source data may affect scores",
+    "The 10% contamination rate is a tuning parameter, not empirically validated fraud prevalence",
+    "Network risk scores depend on completeness of subsidiary/auditor relationship data",
+    "Model requires periodic retraining as financial reporting norms evolve"
+  ],
+  "regulatory_alignment": {
+    "SR_11-7": "Model documentation, validation, and ongoing monitoring requirements met",
+    "EU_AI_Act": "Article 10 bias monitoring, Article 13 transparency, Article 14 human oversight",
+    "NIST_AI_RMF": "Govern, Map, Measure, Manage functions addressed",
+    "SOC2": "Audit trail provides complete change log for compliance review"
+  },
+  "audit_trail": {
+    "total_events": 0,
+    "first_event": "NaT",
+    "last_event": "NaT",
+    "storage": "DuckDB append-only table (audit_trail)",
+    "retention": "Indefinite (immutable records, no deletion)"
+  }
+}

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "finsight360"
+version = "1.0.0"
+description = "Autonomous Financial Anomaly Detection & Risk Intelligence Platform"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+  {name = "Aastha Joshi", email = "ajoshi8879@sdsu.edu"},
+]
+keywords = ["fintech", "anomaly-detection", "sec", "edgar", "risk-intelligence"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+finsight360 = "finsight360.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["finsight360*", "ingestion*", "storage*", "config*", "utils*", "ml*", "graph*", "genai*", "governance*", "dashboard*", "mlops*", "reports*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "integration: marks tests requiring external services (Docker, Neo4j, etc.)",
+]

@@ -1,0 +1,11 @@
+services:
+  finsight-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: streamlit run dashboard/app.py --server.runOnSave true
+    volumes:
+      - .:/app
+    environment:
+      LOG_FORMAT: console
+      LOG_LEVEL: DEBUG

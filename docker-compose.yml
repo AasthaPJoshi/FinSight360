@@ -1,0 +1,116 @@
+services:
+
+  # ── Streamlit dashboard ────────────────────────────────────────────────
+  finsight-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: finsight360-dashboard
+    ports:
+      - "8501:8501"
+    env_file: .env
+    volumes:
+      - finsight_data:/app/data
+      - finsight_models:/app/models
+      - finsight_mlruns:/app/mlruns
+      - finsight_chroma:/app/data/chromadb
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - finsight-net
+
+  # ── Daily ingestion worker ─────────────────────────────────────────────
+  finsight-ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: finsight360-ingest
+    command: >
+      sh -c "python -m finsight360.cli ml-run &&
+             python -m finsight360.cli graph-build &&
+             python -m finsight360.cli governance-report"
+    env_file: .env
+    volumes:
+      - finsight_data:/app/data
+      - finsight_models:/app/models
+      - finsight_mlruns:/app/mlruns
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - finsight-net
+
+  # ── Neo4j: corporate knowledge graph ──────────────────────────────────
+  neo4j:
+    image: neo4j:5.20-community
+    container_name: finsight360-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/finsight360
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - finsight-net
+
+  # ── MLflow: experiment tracking + model registry ───────────────────────
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.13.2
+    container_name: finsight360-mlflow
+    ports:
+      - "5001:5001"
+    command: >
+      mlflow server
+        --host 0.0.0.0
+        --port 5001
+        --backend-store-uri sqlite:///mlflow.db
+        --default-artifact-root /mlruns
+    volumes:
+      - finsight_mlruns:/mlruns
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - finsight-net
+
+volumes:
+  finsight_data:
+  finsight_models:
+  finsight_mlruns:
+  finsight_chroma:
+  neo4j_data:
+  neo4j_logs:
+
+networks:
+  finsight-net:
+    driver: bridge

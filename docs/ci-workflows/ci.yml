@@ -1,0 +1,77 @@
+name: CI — Test Suite
+
+on:
+  push:
+    branches: ["main", "develop", "claude/*"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: Run test suite
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgomp1
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create required directories
+        run: |
+          mkdir -p data/raw data/processed data/chromadb \
+                   models mlruns reports/shap_plots docs \
+                   data/raw/filings data/reference
+
+      - name: Copy env file
+        run: cp .env.example .env
+
+      - name: Run linting (ruff)
+        run: |
+          pip install ruff
+          ruff check . --select E,F,I --ignore E501 || true
+
+      - name: Run full test suite
+        env:
+          DUCKDB_PATH: "data/test_ci.duckdb"
+          EDGAR_USER_AGENT: "FinSight360 CI ci@finsight360.com"
+          LOG_LEVEL: "WARNING"
+          OPENAI_API_KEY: "sk-test-not-real"
+          NEO4J_URI: "bolt://localhost:7687"
+        run: |
+          pytest tests/ -v \
+            --tb=short \
+            --timeout=120 \
+            -x \
+            --junitxml=test-results.xml \
+            -m "not integration"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results.xml
+
+      - name: Check test count
+        run: |
+          COUNT=$(pytest tests/ --collect-only -q -m "not integration" 2>/dev/null | grep "selected" | grep -oP '^\d+' || echo "unknown")
+          echo "Test count: $COUNT"

@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+data/*.duckdb.wal
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+*.duckdb.wal
+.env
+mlruns/
+models/
+reports/output/
+reports/shap_plots/
+data/kaggle/

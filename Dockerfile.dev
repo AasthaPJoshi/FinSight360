@@ -1,0 +1,24 @@
+# FinSight360 — Development Dockerfile
+# Includes all build tools, IPython, and hot-reload support
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc g++ libgomp1 git curl vim \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir ipython jupyter pytest-watch
+
+COPY . .
+RUN mkdir -p data/raw data/processed data/chromadb models mlruns \
+             reports/shap_plots docs data/raw/filings logs
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV LOG_FORMAT=console
+ENV LOG_LEVEL=DEBUG
+
+CMD ["bash"]

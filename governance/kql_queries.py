@@ -1,0 +1,188 @@
+"""
+KQL (Kusto Query Language) query library for FinSight360.
+Ready-to-paste into Azure Data Explorer, Azure Monitor, or Microsoft Sentinel.
+"""
+from pathlib import Path
+
+KQL_QUERIES = {
+    "high_risk_companies": """
+// FinSight360 — High Risk Companies
+// Returns companies with final risk score above threshold
+FinSightRiskScores
+| where final_risk_score > 70
+| project ticker, company_name, industry_group,
+          final_risk_score, final_risk_tier,
+          ml_risk_score, benford_risk_score, network_risk,
+          is_anomaly, computed_at
+| order by final_risk_score desc
+| take 50
+""",
+    "anomaly_trend_over_time": """
+// FinSight360 — Anomaly Rate Trend
+FinSightAuditTrail
+| where event_type == "risk_score_generated"
+| where generated_at > ago(90d)
+| summarize
+    total_scored = count(),
+    anomalies_flagged = countif(is_anomaly == true),
+    avg_risk_score = avg(final_risk_score),
+    high_risk_count = countif(final_risk_tier in ("HIGH","CRITICAL"))
+    by bin(generated_at, 1d)
+| order by generated_at asc
+| render timechart
+""",
+    "industry_risk_distribution": """
+// FinSight360 — Risk Distribution by Industry
+FinSightRiskScores
+| summarize
+    company_count = count(),
+    avg_risk = avg(final_risk_score),
+    median_risk = percentile(final_risk_score, 50),
+    anomaly_rate = countif(is_anomaly == true) * 1.0 / count(),
+    critical_count = countif(final_risk_tier == "CRITICAL"),
+    high_count = countif(final_risk_tier == "HIGH")
+    by industry_group
+| order by avg_risk desc
+| render barchart
+""",
+    "benford_non_conforming": """
+// FinSight360 — Benford Law Non-Conforming Companies
+FinSightBenfordResults
+| where conformity_rating == "Non-conforming"
+| project ticker, company_name, mad_score,
+          benford_risk_score, chi_square_p_value, interpretation
+| order by benford_risk_score desc
+""",
+    "audit_trail_summary": """
+// FinSight360 — Audit Trail Summary (last 30 days)
+FinSightAuditTrail
+| where generated_at > ago(30d)
+| summarize
+    total_events = count(),
+    unique_companies = dcount(cik),
+    human_reviews = countif(human_reviewed == true),
+    escalations = countif(review_action == "escalated"),
+    high_risk_flags = countif(final_risk_tier in ("HIGH","CRITICAL"))
+    by event_type
+| order by total_events desc
+""",
+    "model_performance_monitoring": """
+// FinSight360 — Model Performance Over Time (drift detection)
+FinSightAuditTrail
+| where event_type == "risk_score_generated"
+| where generated_at > ago(180d)
+| summarize
+    avg_ml_score = avg(ml_risk_score),
+    avg_final_score = avg(final_risk_score),
+    p90_score = percentile(final_risk_score, 90),
+    anomaly_rate = countif(is_anomaly == true) * 1.0 / count()
+    by bin(generated_at, 7d)
+| order by generated_at asc
+| render timechart
+""",
+    "shap_top_features": """
+// FinSight360 — Global SHAP Feature Importance
+FinSightSHAPValues
+| summarize
+    mean_abs_shap = avg(abs_shap_value),
+    companies_affected = dcount(cik),
+    risk_increasing = countif(direction == "Risk ↑"),
+    risk_decreasing = countif(direction == "Risk ↓")
+    by friendly_name
+| order by mean_abs_shap desc
+| take 15
+""",
+    "network_risk_clusters": """
+// FinSight360 — High-Risk Network Communities
+FinSightRiskScores
+| where community_id >= 0
+| summarize
+    company_count = count(),
+    avg_risk = avg(final_risk_score),
+    anomaly_count = countif(is_anomaly == true),
+    companies = make_list(ticker, 5)
+    by community_id
+| where avg_risk > 50
+| order by avg_risk desc
+""",
+    "late_filing_correlation": """
+// FinSight360 — Late Filing Risk Correlation
+FinSightRiskScores
+| extend filing_behavior = iff(late_filings_count > 0,
+                                "Late Filer", "On-Time Filer")
+| summarize
+    company_count = count(),
+    avg_risk_score = avg(final_risk_score),
+    anomaly_rate = countif(is_anomaly == true) * 1.0 / count()
+    by filing_behavior
+""",
+}
+
+KQL_TABLE_SCHEMA = """
+// FinSight360 — Azure Data Explorer Table Schemas
+
+.create table FinSightRiskScores (
+    cik: string, ticker: string, company_name: string,
+    industry_group: string, ml_risk_score: real,
+    benford_risk_score: real, network_risk: real,
+    final_risk_score: real, final_risk_tier: string,
+    is_anomaly: bool, community_id: int,
+    computed_at: datetime
+)
+
+.create table FinSightAuditTrail (
+    audit_id: string, event_type: string, cik: string,
+    ticker: string, company_name: string,
+    model_name: string, model_version: string,
+    ml_risk_score: real, benford_risk_score: real,
+    network_risk: real, final_risk_score: real,
+    final_risk_tier: string, is_anomaly: bool,
+    total_signals: int, generated_at: datetime,
+    human_reviewed: bool, review_action: string
+)
+
+.create table FinSightBenfordResults (
+    cik: string, company_name: string, ticker: string,
+    n_observations: int, mad_score: real,
+    chi_square_p_value: real, conformity_rating: string,
+    benford_risk_score: real, interpretation: string,
+    computed_at: datetime
+)
+
+.create table FinSightSHAPValues (
+    cik: string, feature_name: string, friendly_name: string,
+    shap_value: real, feature_value: real,
+    abs_shap_value: real, direction: string,
+    rank_in_company: int, computed_at: datetime
+)
+"""
+
+
+def get_all_queries() -> dict[str, str]:
+    return KQL_QUERIES
+
+
+def get_table_schema() -> str:
+    return KQL_TABLE_SCHEMA
+
+
+def export_kql_file(output_path: str = "docs/kql_queries.kql") -> str:
+    """Export all KQL queries to a .kql file."""
+    lines = [
+        "// FinSight360 — KQL Query Library for Azure Data Explorer",
+        "// Compatible with: Azure Data Explorer, Azure Monitor, Microsoft Sentinel",
+        "",
+    ]
+    for name, query in KQL_QUERIES.items():
+        lines.append("=" * 60)
+        lines.append(f"// Query: {name.replace('_', ' ').title()}")
+        lines.append("=" * 60)
+        lines.append(query.strip())
+        lines.append("")
+
+    lines.append(KQL_TABLE_SCHEMA)
+    content = "\n".join(lines)
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(output_path).write_text(content)
+    return output_path

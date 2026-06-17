@@ -1,0 +1,35 @@
+[
+  {"parent_cik": "1018724", "parent_name": "Amazon", "subsidiary_cik": "AMZN_AWS", "subsidiary_name": "Amazon Web Services", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "1018724", "parent_name": "Amazon", "subsidiary_cik": "AMZN_WHOLE", "subsidiary_name": "Whole Foods Market", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "1018724", "parent_name": "Amazon", "subsidiary_cik": "AMZN_MGM", "subsidiary_name": "MGM Holdings", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "320193", "parent_name": "Apple", "subsidiary_cik": "AAPL_BEATS", "subsidiary_name": "Beats Electronics", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "320193", "parent_name": "Apple", "subsidiary_cik": "AAPL_SHAZAM", "subsidiary_name": "Shazam Entertainment", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "789019", "parent_name": "Microsoft", "subsidiary_cik": "MSFT_GITHUB", "subsidiary_name": "GitHub", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "789019", "parent_name": "Microsoft", "subsidiary_cik": "MSFT_LINKEDIN", "subsidiary_name": "LinkedIn Corporation", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "789019", "parent_name": "Microsoft", "subsidiary_cik": "MSFT_ACTIVISION", "subsidiary_name": "Activision Blizzard", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "1652044", "parent_name": "Alphabet", "subsidiary_cik": "GOOGL_YOUTUBE", "subsidiary_name": "YouTube LLC", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+  {"parent_cik": "1652044", "parent_name": "Alphabet", "subsidiary_cik": "GOOGL_DEEPMIND", "subsidiary_name": "DeepMind Technologies", "relationship_type": "SUBSIDIARY", "ownership_pct": 100.0},
+
+  {"parent_cik": "320193", "parent_name": "Apple", "subsidiary_cik": "789019", "subsidiary_name": "Microsoft", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "1018724", "parent_name": "Amazon", "subsidiary_cik": "1326801", "subsidiary_name": "Meta Platforms", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "1045810", "parent_name": "Tesla", "subsidiary_cik": "789019", "subsidiary_name": "Microsoft", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "1318605", "parent_name": "SpaceX (private)", "subsidiary_cik": "1045810", "subsidiary_name": "Tesla", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "1067983", "parent_name": "Berkshire Hathaway", "subsidiary_cik": "19617", "subsidiary_name": "JPMorgan Chase", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "789019", "parent_name": "Microsoft", "subsidiary_cik": "1652044", "subsidiary_name": "Alphabet", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "200406", "parent_name": "Johnson & Johnson", "subsidiary_cik": "66740", "subsidiary_name": "Merck", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+  {"parent_cik": "1045810", "parent_name": "Tesla", "subsidiary_cik": "1403161", "subsidiary_name": "Nvidia", "relationship_type": "PARTNERS_WITH", "ownership_pct": null},
+
+  {"parent_cik": "320193", "parent_name": "Apple", "subsidiary_cik": "1403161", "subsidiary_name": "Nvidia", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+  {"parent_cik": "789019", "parent_name": "Microsoft", "subsidiary_cik": "1403161", "subsidiary_name": "Nvidia", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+  {"parent_cik": "1652044", "parent_name": "Alphabet", "subsidiary_cik": "1403161", "subsidiary_name": "Nvidia", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+  {"parent_cik": "1018724", "parent_name": "Amazon", "subsidiary_cik": "1403161", "subsidiary_name": "Nvidia", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+  {"parent_cik": "1326801", "parent_name": "Meta Platforms", "subsidiary_cik": "1403161", "subsidiary_name": "Nvidia", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+  {"parent_cik": "858877", "parent_name": "Exxon Mobil", "subsidiary_cik": "80661", "subsidiary_name": "Chevron", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+  {"parent_cik": "804328", "parent_name": "Walmart", "subsidiary_cik": "1018724", "subsidiary_name": "Amazon", "relationship_type": "CUSTOMER_OF", "ownership_pct": null},
+
+  {"parent_cik": "1045810", "parent_name": "Tesla", "subsidiary_cik": "858877", "subsidiary_name": "Exxon Mobil", "relationship_type": "JOINT_VENTURE_WITH", "ownership_pct": null},
+  {"parent_cik": "789019", "parent_name": "Microsoft", "subsidiary_cik": "1800227", "subsidiary_name": "OpenAI", "relationship_type": "JOINT_VENTURE_WITH", "ownership_pct": 49.0},
+  {"parent_cik": "19617", "parent_name": "JPMorgan Chase", "subsidiary_cik": "804328", "subsidiary_name": "Walmart", "relationship_type": "JOINT_VENTURE_WITH", "ownership_pct": null},
+  {"parent_cik": "200406", "parent_name": "Johnson & Johnson", "subsidiary_cik": "895126", "subsidiary_name": "Pfizer", "relationship_type": "JOINT_VENTURE_WITH", "ownership_pct": null},
+  {"parent_cik": "858877", "parent_name": "Exxon Mobil", "subsidiary_cik": "80661", "subsidiary_name": "Chevron", "relationship_type": "JOINT_VENTURE_WITH", "ownership_pct": 50.0}
+]
